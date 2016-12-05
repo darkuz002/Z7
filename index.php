@@ -4,13 +4,13 @@ session_start();
 $_SESSION["zalogowany"];
 if(empty($_SESSION["zalogowany"]))$_SESSION["zalogowany"]=0;
 
-//£πczenie z serwerem
+//≈ÅƒÖczenie z serwerem
 $connection = @mysql_connect('serwer1699338.home.pl', '21777739_z7', 'qwerty123456')
-or die('Nie po≥πczono z serwerem !!!<br />B≥πd: '.mysql_error()); 
+or die('Nie po≈ÇƒÖczono z serwerem !!!<br />B≈ÇƒÖd: '.mysql_error()); 
 
-//£πczenie z bazπ danych
+//≈ÅƒÖczenie z bazƒÖ danych
 $db = @mysql_select_db('21777739_z7', $connection) 
-or die('Nie po≥πczono siÍ z bazπ danych!!!<br />B≥πd: '.mysql_error()); 
+or die('Nie po≈ÇƒÖczono siƒô z bazƒÖ danych!!!<br />B≈ÇƒÖd: '.mysql_error()); 
 
 function ShowLogin($komunikat=""){
 	echo "$komunikat<br>";
@@ -32,25 +32,66 @@ function ShowLogin($komunikat=""){
 </head>
 <body>
 <?php
+
 if($_GET["wyloguj"]=="tak"){$_SESSION["zalogowany"]=0;echo "Zostales wylogowany z serwisu";}
 if($_SESSION["zalogowany"]!=1){
 	if(!empty($_POST["login"]) && !empty($_POST["haslo"])){
 		$s = $_POST['haslo'];
 		if(mysql_num_rows(mysql_query("select * from users where Login = '".htmlspecialchars($_POST["login"])."' AND Haslo = '".htmlspecialchars($s)."'"))){
+			$zap = mysql_query("SELECT * FROM users where Login = '".htmlspecialchars($_POST["login"])."'") or die('B≈ÇƒÖd'); 			
+			$log = mysql_fetch_array($zap);
+			$ilosc = $log["Proby"];
 			echo "Zalogowano poprawnie. <a href='index.php'>Przejdz na strone glowna</a>";
+			$i=0;
 			$_SESSION["zalogowany"]=1;
 			$_SESSION['login']=$_POST['login'];
 			$ip = $_SERVER["REMOTE_ADDR"];
 			$stan = "TAK";
 			$log=mysql_query("INSERT INTO logi VALUES (NULL, NULL,'".htmlspecialchars($_POST["login"])."','$ip','$stan')") or die('Blad zapytania');
+			$prob=mysql_query("UPDATE users SET Proby='$i' WHERE Login='".htmlspecialchars($_POST["login"])."'") or die('Blad zapytania');
+			if ($ilosc != 0){
+			$z= "NIE";
+			$zapytanie2 = mysql_query("SELECT * FROM logi WHERE Uzytkownik= '".htmlspecialchars($_POST["login"])."' AND Zalogowano='$z' ORDER BY ID DESC LIMIT 1") or die('B≈ÇƒÖd'); 			
+			$wynik = mysql_fetch_array($zapytanie2);
+			$data = $wynik["Data/godzina"];
+			echo "<br><br>Uwaga, ostatnie bledne logowanie : $data";
 			}
-		else echo ShowLogin("Podano zle dane!!!");
+			}
+		else{
+			$ip = $_SERVER["REMOTE_ADDR"];
+			$stan = "NIE";
+			$log=mysql_query("INSERT INTO logi VALUES (NULL, NULL,'".htmlspecialchars($_POST["login"])."','$ip','$stan')") or die('Blad zapytania');
+			if(mysql_num_rows(mysql_query("select * from users where Login = '".htmlspecialchars($_POST["login"])."'"))){
+				$zap = mysql_query("SELECT * FROM users where Login = '".htmlspecialchars($_POST["login"])."'") or die('B≈ÇƒÖd');
+				$log = mysql_fetch_array($zap);
+				$ilosc = $log["Proby"];
+				if ($ilosc == 0){
+				$q=1;
+				echo ShowLogin("Bledne logowanie po raz pierwszy");
+				$prob=mysql_query("UPDATE users SET Proby='$q' WHERE Login='".htmlspecialchars($_POST["login"])."'") or die('Blad zapytania');
+				}
+			if ($ilosc == 1){
+				$q=2;
+				echo ShowLogin("Bledne logowanie po raz drugi");
+				$prob=mysql_query("UPDATE users SET Proby='$q' WHERE Login='".htmlspecialchars($_POST["login"])."'") or die('Blad zapytania');
+			}
+			if ($ilosc == 2){
+				$q=3;
+				echo ShowLogin("Bledne logowanie po raz trzeci. Konto zostaje zablokowane. Skontaktuj sie z administratorem");
+				$prob=mysql_query("DELETE FROM users WHERE Login='".htmlspecialchars($_POST["login"])."'") or die('Blad zapytania');
+			}		
+
+
+			} else{
+				ShowLogin("Podales zly login !!!!!!!!");
+			}			
+		} 
 		}
-	else ShowLogin();
+	else {ShowLogin("Nie podales zadnych danych !!!!!!!!");}
 }
 else{
 ?>
-Zalogowales sie pomyslnie! Przejdz do <a href="dodaj.php">portalu</a>
+<br>Zalogowales sie pomyslnie! Przejdz do <a href="dodaj.php">portalu</a>
 <br><a href='index.php?wyloguj=tak'>wyloguj sie</a>
 <?php
 }
