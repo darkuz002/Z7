@@ -1,14 +1,14 @@
 <?php
 ini_set( 'display_errors', 'Off' ); 
-//£¹czenie z serwerem
+//ÅÄ…czenie z serwerem
 $connection = @mysql_connect('serwer1699338.home.pl', '21777739_z7', 'qwerty123456')
-or die('Nie po³¹czono z serwerem !!!<br />B³¹d: '.mysql_error()); 
+or die('Nie poÅ‚Ä…czono z serwerem !!!<br />BÅ‚Ä…d: '.mysql_error()); 
 
-//£¹czenie z baz¹ danych
+//ÅÄ…czenie z bazÄ… danych
 $db = @mysql_select_db('21777739_z7', $connection) 
-or die('Nie po³¹czono siê z baz¹ danych!!!<br />B³¹d: '.mysql_error()); 
+or die('Nie poÅ‚Ä…czono siÄ™ z bazÄ… danych!!!<br />BÅ‚Ä…d: '.mysql_error()); 
 
-function ShowForm($komunikat=""){	//funkcja wyœwietlaj¹ca formularz rejestracyjny
+function ShowForm($komunikat=""){	//funkcja wyÅ›wietlajÄ…ca formularz rejestracyjny
 	echo "$komunikat<br>";
 	echo "<form action='rejestracja.php' method=post>";
 	echo "Login: <input type=text name=login><br>";
@@ -28,18 +28,21 @@ function ShowForm($komunikat=""){	//funkcja wyœwietlaj¹ca formularz rejestracyjn
 </head>
 <body>
 <?php
-if($_POST["send"]==1){	//sprawdzanie czy formularz zosta³ wys³any
-	if(!empty($_POST["login"]) && !empty($_POST["haslo"])){	//oraz czy uzupe³niono wszystkie dane
-		if(mysql_num_rows(mysql_query("select * from users where Login='".htmlspecialchars($_POST["login"]."'"))))ShowForm("Uzytkownik o podanym loginie juz istnieje!!!"); // sprawdzanie czy u¿ytkownik o podanej nazwie ju¿ istnieje
+if($_POST["send"]==1){	//sprawdzanie czy formularz zostaÅ‚ wysÅ‚any
+	if(!empty($_POST["login"]) && !empty($_POST["haslo"])){	//oraz czy uzupeÅ‚niono wszystkie dane
+		if(mysql_num_rows(mysql_query("select * from users where Login='".htmlspecialchars($_POST["login"]."'"))))ShowForm("Uzytkownik o podanym loginie juz istnieje!!!"); // sprawdzanie czy uÅ¼ytkownik o podanej nazwie juÅ¼ istnieje
 		else{
-			mysql_query("insert into users values (NULL, '".htmlspecialchars($_POST["login"])."', '".htmlspecialchars($_POST['haslo'])."')"); // zapisywanie rekordu do bazy
+		$a=0;
+			mysql_query("insert into users values (NULL, '".htmlspecialchars($_POST["login"])."', '".htmlspecialchars($_POST['haslo'])."','$a')"); // zapisywanie rekordu do bazy
 			echo "Rejestracja przebiegla pomyslnie. Mozesz teraz przejsc do <a href='index.php'>strony glownej</a> i sie zalogowac.";
+			$folder = $_POST['login'];
+			mkdir ("./$folder", 0777);
 			}
 	}
 	else ShowForm("Nie uzupelniono wszystkich pol!!!");
 }
 else ShowForm();
-mysql_close(); //zamykanie po³¹czenia z baz¹
+mysql_close(); //zamykanie poÅ‚Ä…czenia z bazÄ…
 ?>
 </body>
 </html>
